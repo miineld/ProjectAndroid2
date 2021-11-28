@@ -1,33 +1,61 @@
 package com.example.myinstabook
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.example.myinstabook.databinding.ItemUserBinding
 
-class ListUserAdapter(private val listUser: List<String>) : RecyclerView.Adapter<ListUserAdapter.ViewHolder>() {
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(viewGroup.context).inflate(R.layout.item_user, viewGroup, false)
-        return ViewHolder(view)
-    }
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        viewHolder.tvItem.text = listUser[position]
 
+class ListUserAdapter: RecyclerView.Adapter<ListUserAdapter.UserViewHolder>() {
+
+    private val list = ArrayList<User>()
+
+    private var onItemClickCallback: OnItemClickCallback? = null
+
+    fun setOnItemClickCallback (onItemClickCallback: OnItemClickCallback) {
+        this.onItemClickCallback = onItemClickCallback
     }
-    override fun getItemCount(): Int {
-        return listUser.size
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setList(users: ArrayList<User>) {
+        list.clear()
+        list.addAll(users)
+        notifyDataSetChanged()
     }
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvItem: TextView = view.findViewById(R.id.tvItem)
+
+    inner class UserViewHolder(val binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(user: User) {
+            binding.root.setOnClickListener {
+                onItemClickCallback?.onItemClicked(user)
+            }
+
+            binding.apply {
+                Glide.with(itemView)
+                    .load(user.avatar_url)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .centerCrop()
+                    .into(ivUser)
+                tvUsername.text = user.login
+            }
+
+        }
     }
-//    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int) =
-//        ViewHolder(LayoutInflater.from(viewGroup.context).inflate(R.layout.item_user, viewGroup, false))
-//    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-//        viewHolder.tvItem.text = listReview[position]
-//    }
-//    override fun getItemCount() = listReview.size
-//    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-//        val tvItem: TextView = view.findViewById(R.id.tv_item_name)
-//    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
+        val view = ItemUserBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return UserViewHolder((view))
+    }
+
+    override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
+        holder.bind(list[position])
+    }
+
+    override fun getItemCount(): Int = list.size
+
+    interface OnItemClickCallback {
+        fun onItemClicked(data: User)
+    }
 }
