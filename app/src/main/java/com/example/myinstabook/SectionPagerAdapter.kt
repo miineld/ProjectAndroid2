@@ -23,10 +23,15 @@ class SectionPagerAdapter(private val mCtx: Context, fm: FragmentManager, data: 
     override fun getItem(position: Int): Fragment {
         var fragment: Fragment? = null
         when(position) {
-            0 -> fragment = FollowersFragment()
-            1 -> fragment = FollowingFragment()
+            0 -> {
+                fragment = FollowersFragment()
+                fragment.arguments = this.fragmentBundle
+            }
+            1 -> {
+                fragment = FollowingFragment()
+                fragment.arguments = this.fragmentBundle
+            }
         }
-        fragment?.arguments = this.fragmentBundle
         return fragment as Fragment
     }
 
